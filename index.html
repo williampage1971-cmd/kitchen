@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#121110">
 <meta name="apple-mobile-web-app-title" content="Kitchen">
 <title>Kitchen Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,10 +17,7 @@
    COLOUR and TYPE: tomato red, white, mustard accent; Outfit numerals, Atkinson Hyperlegible text.
    LAYOUT: side panel (clock, weather, timers) + recipe area; stacks on narrow screens.
    Written in plain older CSS/JS so it runs on old iPads. */
-:root{--bg:#fff;--ink:#1d1b1a;--soft:#6b6561;--line:#e7e2de;--card:#f7f4f2;--red:#cf3a24;--red2:#b32f1b;--mus:#f2b632;--on:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#191716;--ink:#f3efeb;--soft:#a8a09a;--line:#34302d;--card:#24211f;--red:#8e2a1a;--red2:#7a2315}}
-:root[data-theme=light]{--bg:#fff;--ink:#1d1b1a;--soft:#6b6561;--line:#e7e2de;--card:#f7f4f2;--red:#cf3a24;--red2:#b32f1b}
-:root[data-theme=dark]{--bg:#191716;--ink:#f3efeb;--soft:#a8a09a;--line:#34302d;--card:#24211f;--red:#8e2a1a;--red2:#7a2315}
+:root{color-scheme:dark;--bg:#121110;--panel:#1b1917;--chip:#272320;--ink:#f2eee9;--soft:#a39b94;--line:#2f2b28;--card:#1e1b19;--red:#d4472f;--red2:#e8634b;--mus:#f2b632;--on:#f2eee9}
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Atkinson Hyperlegible",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
@@ -26,27 +25,27 @@ button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;-webkit-tap-highlight-color:transparent}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--mus);outline-offset:2px}
 .app{display:-webkit-flex;display:flex;height:100%}
-.side{width:36%;max-width:440px;background:var(--red);color:var(--on);padding:28px 26px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column}
+.side{width:36%;max-width:440px;background:var(--panel);border-right:1px solid var(--line);color:var(--on);padding:28px 26px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column}
 .clock{font-family:Outfit,Helvetica,sans-serif;font-weight:300;font-size:96px;line-height:1;letter-spacing:-2px;white-space:nowrap}
 .clock small{font-size:28px;letter-spacing:0;margin-left:6px;font-weight:600}
-.date{font-size:22px;margin-top:8px;font-weight:700}
-.wx{display:block;width:100%;text-align:left;margin-top:22px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.14);color:var(--on);min-height:44px}
-.wx b{font-family:Outfit,sans-serif;font-weight:600;font-size:40px;line-height:1}
+.date{font-size:22px;margin-top:8px;font-weight:700;color:var(--mus)}
+.wx{display:block;width:100%;text-align:left;margin-top:22px;padding:14px 16px;border-radius:14px;background:var(--chip);color:var(--on);min-height:44px}
+.wx b{color:#fff;font-family:Outfit,sans-serif;font-weight:600;font-size:40px;line-height:1}
 .wx span{display:block;font-size:16px;opacity:.9}
 .side h2{font-family:Outfit,sans-serif;font-weight:600;font-size:22px;margin:26px 0 10px}
 .presets{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-4px}
-.presets button{margin:4px;min-width:56px;min-height:48px;padding:0 12px;border-radius:12px;background:var(--on);color:var(--red2);font-weight:700;font-size:18px}
-.t{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,.18)}
+.presets button{margin:4px;min-width:56px;min-height:48px;padding:0 12px;border-radius:12px;background:var(--chip);color:var(--on);border:1px solid #3a3531;font-weight:700;font-size:18px}
+.t{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--chip);border-left:4px solid var(--red2)}
 .t .n{-webkit-flex:1;flex:1;font-size:15px;opacity:.9}
 .t .v{font-family:Outfit,sans-serif;font-weight:600;font-size:34px;white-space:nowrap;margin-right:10px}
-.t button{min-width:44px;min-height:44px;border-radius:10px;background:rgba(255,255,255,.2);color:var(--on);font-weight:700}
-.t.done{background:var(--mus);color:#1d1b1a;-webkit-animation:pulse 1s infinite;animation:pulse 1s infinite}
+.t button{min-width:44px;min-height:44px;border-radius:10px;background:#3a3531;color:var(--on);font-weight:700}
+.t.done{background:var(--mus);color:#1d1b1a;border-left-color:var(--mus);-webkit-animation:pulse 1s infinite;animation:pulse 1s infinite}
 .t.done button{background:#1d1b1a;color:#fff;padding:0 14px}
 @-webkit-keyframes pulse{50%{opacity:.6}}@keyframes pulse{50%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){.t.done{-webkit-animation:none;animation:none}}
 .empty{opacity:.8;font-size:15px;margin-top:10px}
 .foot{margin-top:auto;padding-top:24px}
-.foot button{color:var(--on);text-decoration:underline;min-height:44px;font-size:15px;padding:0}
+.foot button{color:var(--soft);text-decoration:underline;min-height:44px;font-size:15px;padding:0}
 .main{-webkit-flex:1;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:28px 30px 60px}
 .bar{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin-bottom:18px}
 .bar h1{font-family:Outfit,sans-serif;font-weight:600;font-size:40px;line-height:1.05;margin:0 auto 8px 0;padding-right:12px}
@@ -55,6 +54,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .search{width:100%;font-size:17px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);margin-bottom:18px;-webkit-appearance:none}
 .cards{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-8px}
 .card{width:calc(50% - 16px);margin:8px;text-align:left;padding:20px;border-radius:16px;background:var(--card);border:1px solid var(--line);min-height:120px}
+.card:active{border-color:var(--red2)}
 .card b{display:block;font-family:Outfit,sans-serif;font-weight:600;font-size:24px;line-height:1.15}
 .card span{display:block;color:var(--soft);margin-top:6px;font-size:15px}
 .note{color:var(--soft);font-size:14px;margin-top:20px}
@@ -76,7 +76,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .big .ing,.big .steps{font-size:23px}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;padding:16px;z-index:9}
 .modal[hidden]{display:none}
-.sheet{background:var(--bg);color:var(--ink);border-radius:18px;padding:24px;width:100%;max-width:560px;max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet{background:var(--panel);border:1px solid #3a3531;color:var(--ink);border-radius:18px;padding:24px;width:100%;max-width:560px;max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .sheet h2{font-family:Outfit,sans-serif;font-weight:600;font-size:28px;margin:0 0 14px}
 .sheet label{display:block;font-weight:700;margin:14px 0 6px}
 .sheet input,.sheet textarea{width:100%;font-size:17px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);-webkit-appearance:none}
