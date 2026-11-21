@@ -10,7 +10,7 @@ The owner photographs recipe-book pages and asks Claude to add them.
 - `id`: short lowercase slug, unique, never change an existing one (the iPad uses ids to remember edits/removals).
 - Transcribe faithfully: keep the book's quantities, units, temperatures and wording. One ingredient per
   `ing` entry; one step per `steps` entry, joining lines the page wrapped. Ingredient sub-headings
-  (e.g. "For the sauce") can be their own `ing` entry ending in a colon.
+  (e.g. "For the sauce") must be their own `ing` entry ending in a colon; the app shows those as headings, not tick boxes.
 - Say "N minutes" in a step where the book gives a time: the app turns it into a timer button
   (a range like "15-18 minutes" makes a timer for the first number).
 - `"cats":["Breakfast"]`: one or more categories, shown as filter buttons on the iPad. Reuse existing
