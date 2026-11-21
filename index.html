@@ -35,13 +35,15 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .wx span{display:block;font-size:16px;opacity:.9}
 .wx .now{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}
 .wx .now svg{width:44px;height:44px;margin-right:10px;-webkit-flex:none;flex:none}
-.fc{display:-webkit-flex;display:flex;margin:14px -4px 0;padding-top:12px;border-top:1px solid #3a3531}
-.fc div{-webkit-flex:1;flex:1;text-align:center;padding:0 2px}
+.fc{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:14px -6px 0;padding-top:12px;border-top:1px solid #3a3531}
+.fc div{width:14.28%;text-align:center;padding:0 1px}
 .fc i{display:block;font-style:normal;font-size:14px;font-weight:700;color:var(--soft)}
-.fc svg{width:30px;height:30px;margin:4px 0 2px}
-.fc b{display:block;font-family:Outfit,sans-serif;font-size:18px;font-weight:600;line-height:1.1;white-space:nowrap}
+.fc svg{width:28px;height:28px;margin:4px 0 2px}
+.fc b{display:block;font-family:Outfit,sans-serif;font-size:17px;font-weight:600;line-height:1.1;white-space:nowrap}
 .fc em{display:block;font-style:normal;font-size:14px;color:var(--soft);white-space:nowrap}
-.fc u{display:block;text-decoration:none;font-size:13px;color:#7fb2e5;white-space:nowrap}
+.fc u{display:block;text-decoration:none;font-size:13px;font-weight:700;color:#7fb2e5;white-space:nowrap}
+.fcn{font-size:13px;color:var(--soft);margin-top:8px}
+@media (min-width:761px) and (max-width:900px){.fc div{width:25%;margin-bottom:8px}}
 .side h2{font-family:Outfit,sans-serif;font-weight:600;font-size:22px;margin:20px 0 8px}
 .presets{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-4px}
 .presets button{margin:4px;min-width:56px;min-height:48px;padding:0 12px;border-radius:12px;background:var(--chip);color:var(--on);border:1px solid #3a3531;font-weight:700;font-size:18px}
@@ -191,14 +193,14 @@ function icon(c){var sun='<circle cx="12" cy="12" r="4.5" fill="#f2b632"/><path 
 function weather(){
  var w=$("wx");
  if(S.lat==null){w.innerHTML="<span>Tap to set your town for the weather</span>";return}
- var u="https://api.open-meteo.com/v1/forecast?latitude="+S.lat+"&longitude="+S.lon+"&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=6"+(S.unit=="F"?"&temperature_unit=fahrenheit":"");
+ var u="https://api.open-meteo.com/v1/forecast?latitude="+S.lat+"&longitude="+S.lon+"&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=8"+(S.unit=="F"?"&temperature_unit=fahrenheit":"");
  get(u,function(j){
   var c=j.current,dl=j.daily;
   var h='<div class="now">'+icon(c.weather_code)+"<b>"+Math.round(c.temperature_2m)+"°"+S.unit+"</b></div><span>"+esc(WX[c.weather_code]||"")+" in "+esc(S.city)+"</span><span>Today: high "+Math.round(dl.temperature_2m_max[0])+"° · low "+Math.round(dl.temperature_2m_min[0])+"°</span>";
   h+='<div class="fc">';
-  for(var i=1;i<dl.time.length&&i<=5;i++){var t=dl.time[i].split("-"),day=DAYS[new Date(+t[0],t[1]-1,+t[2]).getDay()].slice(0,3),pp=dl.precipitation_probability_max?dl.precipitation_probability_max[i]:null;
-   h+="<div><i>"+day+"</i>"+icon(dl.weather_code[i])+"<b>"+Math.round(dl.temperature_2m_max[i])+"°</b><em>"+Math.round(dl.temperature_2m_min[i])+"°</em>"+(pp>=20?"<u>"+pp+"% rain</u>":"")+"</div>"}
-  w.innerHTML=h+"</div>";
+  for(var i=1;i<dl.time.length&&i<=7;i++){var t=dl.time[i].split("-"),day=DAYS[new Date(+t[0],t[1]-1,+t[2]).getDay()].slice(0,3),pp=dl.precipitation_probability_max?dl.precipitation_probability_max[i]:null;
+   h+="<div><i>"+day+"</i>"+icon(dl.weather_code[i])+"<b>"+Math.round(dl.temperature_2m_max[i])+"°</b><em>"+Math.round(dl.temperature_2m_min[i])+"°</em>"+(pp>=20?'<u title="Chance of rain or snow">'+pp+"%</u>":"")+"</div>"}
+  w.innerHTML=h+'</div><div class="fcn">Blue % = chance of rain or snow</div>';
  },function(){w.innerHTML="<span>Weather is unavailable right now"+(S.city?" for "+esc(S.city):"")+"</span>"});
 }
 
@@ -351,7 +353,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21b";
+var VERSION="2026-11-21c";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){
