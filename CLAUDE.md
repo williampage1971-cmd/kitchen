@@ -16,6 +16,11 @@ The owner photographs recipe-book pages and asks Claude to add them.
 - `"cats":["Breakfast"]`: one or more categories, shown as filter buttons on the iPad. Reuse existing
   ones (check recipes.json) before inventing new ones; Title Case. Current set: Breakfast, Dessert, Dinner, Italian.
   Use the page's own "Course"/"Cuisine" lines as a guide.
+- **Dish photo**: if the page shows a photo of the food, cut it out of the owner's picture and save it as
+  `images/<id>.jpg`, then add `"img":"images/<id>.jpg"`. With Pillow: straighten with
+  `Image.transform((W,H), Image.QUAD, (TLx,TLy, BLx,BLy, BRx,BRy, TRx,TRy))` using corners set slightly inside the
+  printed photo (no page edges or text), about 800px wide, `ImageOps.autocontrast(cutoff=1)`, JPEG quality ~78
+  (keep files around 100 KB for the old iPad). Look at the result before committing. No photo on the page → no `img`.
 - Optional `"notes":["..."]` holds extras such as nutrition/WW points, brand tips and the source/author;
   they show under the steps.
 - If a word is unreadable, make the best guess and tell the owner which one to check.
