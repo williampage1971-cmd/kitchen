@@ -105,7 +105,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .steps li.cur{background:var(--card);outline:3px solid var(--mus)}
 .steps li.cur:before{background:var(--mus);border-color:var(--mus);color:#1d1b1a}
 .steps li.past{color:var(--soft)}
-.steps .tb{margin-top:8px;min-height:44px;padding:0 14px;border-radius:10px;background:var(--red);color:#fff;font-weight:700;font-size:16px}
+.steps .tb{margin:8px 8px 0 0;min-height:44px;padding:0 14px;border-radius:10px;background:var(--red);color:#fff;font-weight:700;font-size:16px}
 .rn{color:var(--soft);margin:0 0 10px;max-width:70ch}
 .big .ing,.big .steps,.big .rn{font-size:23px}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;padding:16px;z-index:9}
@@ -280,6 +280,12 @@ function list(){
  return h;
 }
 var MIN=/(\d+)(?:\s*(?:-|–|to)\s*\d+)?\s*(?:more\s+|additional\s+|extra\s+)?(minutes?|mins?)\b/i;
+/* a timer button for each time in a step, skipping warnings like "more than 20 minutes" */
+function timerBtns(text,label){var re=new RegExp(MIN.source,"gi"),m,seen={},out="";
+ while((m=re.exec(text))){var before=text.slice(0,m.index);
+  if(/(more|less|longer|no more|no longer) than\s*$|\bover\s*$/i.test(before)||seen[m[1]])continue;
+  seen[m[1]]=1;out+='<button class="tb" data-act="timer" data-m="'+m[1]+'" data-l="'+esc(label)+'">Start '+m[1]+" min timer</button>"}
+ return out}
 function recipe(r){
  var h='<div class="bar"><button class="btn alt" data-act="back" style="margin-left:0">‹ All recipes</button><span style="margin-left:auto"></span><button class="btn alt" data-act="big">'+(view.big?"Smaller text":"Bigger text")+'</button><button class="btn alt" data-act="edit" data-id="'+esc(r.id)+'">Edit</button></div>';
  h+='<div class="rv'+(view.big?" big":"")+'"><h1>'+esc(r.title)+'</h1>'+(r.img?'<div class="hero" role="img" aria-label="Photo of '+esc(r.title)+'" style="background-image:url(\''+esc(r.img)+'\')"></div>':"")+'<div class="meta">'+esc([r.time,r.serves?"Serves "+r.serves:"",catsOf(r).join(", ")].filter(Boolean).join(" · "))+"</div>";
@@ -288,8 +294,8 @@ function recipe(r){
   if(/:\s*$/.test(r.ing[i]))h+='<li class="sub">'+esc(r.ing[i].replace(/:\s*$/,""))+"</li>";
   else h+='<li class="'+(view.checked[i]?"on":"")+'"><button data-act="chk" data-i="'+i+'">'+esc(r.ing[i])+"</button></li>"}
  h+='</ul><h2>Steps</h2><p class="note" style="margin-top:-4px">Tap a step to mark where you are.</p><ol class="steps">';
- for(var j=0;j<r.steps.length;j++){var m=r.steps[j].match(MIN);
-  h+='<li data-act="step" data-i="'+j+'" class="'+(j==view.cur?"cur":j<view.cur?"past":"")+'">'+esc(r.steps[j])+(m?'<br><button class="tb" data-act="timer" data-m="'+m[1]+'" data-l="'+esc(r.title+", step "+(j+1))+'">Start '+m[1]+" min timer</button>":"")+"</li>"}
+ for(var j=0;j<r.steps.length;j++){var tb=timerBtns(r.steps[j],r.title+", step "+(j+1));
+  h+='<li data-act="step" data-i="'+j+'" class="'+(j==view.cur?"cur":j<view.cur?"past":"")+'">'+esc(r.steps[j])+(tb?"<br>"+tb:"")+"</li>"}
  h+="</ol>";
  if(r.notes&&r.notes.length){h+="<h2>Notes</h2>";for(var k=0;k<r.notes.length;k++)h+='<p class="rn">'+esc(r.notes[k])+"</p>"}
  return h+"</div>";
@@ -424,7 +430,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21m";
+var VERSION="2026-11-21n";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){
