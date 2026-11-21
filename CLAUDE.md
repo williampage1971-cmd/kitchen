@@ -14,7 +14,7 @@ The owner photographs recipe-book pages and asks Claude to add them.
 - Say "N minutes" in a step where the book gives a time: the app turns it into a timer button
   (a range like "15-18 minutes" makes a timer for the first number).
 - `"cats":["Breakfast"]`: one or more categories, shown as filter buttons on the iPad. Reuse existing
-  ones (check recipes.json) before inventing new ones; Title Case. Current set: Breakfast, Dessert, Dinner, Italian.
+  ones (check recipes.json) before inventing new ones; Title Case. Current set: Breakfast.
   Use the page's own "Course"/"Cuisine" lines as a guide.
 - **Dish photo**: if the page shows a photo of the food, cut it out of the owner's picture and save it as
   `images/<id>.jpg`, then add `"img":"images/<id>.jpg"`. With Pillow: straighten with
@@ -24,7 +24,6 @@ The owner photographs recipe-book pages and asks Claude to add them.
 - Optional `"notes":["..."]` holds extras such as nutrition/WW points, brand tips and the source/author;
   they show under the steps.
 - If a word is unreadable, make the best guess and tell the owner which one to check.
-- The four entries with ids s1–s4 are starter examples; remove them only if the owner asks.
 - Commit and push to `main`; the iPad picks up changes within ~30 minutes (or Settings → Check for new recipes now).
 
 ## Code constraints
