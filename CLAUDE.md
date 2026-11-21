@@ -11,7 +11,10 @@ The owner photographs recipe-book pages and asks Claude to add them.
 - Transcribe faithfully: keep the book's quantities, units, temperatures and wording. One ingredient per
   `ing` entry; one step per `steps` entry, joining lines the page wrapped. Ingredient sub-headings
   (e.g. "For the sauce") can be their own `ing` entry ending in a colon.
-- Say "N minutes" in a step where the book gives a time: the app turns it into a timer button.
+- Say "N minutes" in a step where the book gives a time: the app turns it into a timer button
+  (a range like "15-18 minutes" makes a timer for the first number).
+- Optional `"notes":["..."]` holds extras such as nutrition/WW points, brand tips and the source/author;
+  they show under the steps.
 - If a word is unreadable, make the best guess and tell the owner which one to check.
 - The four entries with ids s1–s4 are starter examples; remove them only if the owner asks.
 - Commit and push to `main`; the iPad picks up changes within ~30 minutes (or Settings → Check for new recipes now).

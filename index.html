@@ -85,7 +85,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .steps li.cur:before{background:var(--mus);border-color:var(--mus);color:#1d1b1a}
 .steps li.past{color:var(--soft)}
 .steps .tb{margin-top:8px;min-height:44px;padding:0 14px;border-radius:10px;background:var(--red);color:#fff;font-weight:700;font-size:16px}
-.big .ing,.big .steps{font-size:23px}
+.rn{color:var(--soft);margin:0 0 10px;max-width:70ch}
+.big .ing,.big .steps,.big .rn{font-size:23px}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;padding:16px;z-index:9}
 .modal[hidden]{display:none}
 .sheet{background:var(--panel);border:1px solid #3a3531;color:var(--ink);border-radius:18px;padding:24px;width:100%;max-width:560px;max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -231,7 +232,7 @@ function list(){
  h+='<p class="note">Recipes Claude adds from your photos appear here automatically and are backed up on GitHub. Recipes you add or edit on this iPad are saved on this iPad only.</p>';
  return h;
 }
-var MIN=/(\d+)\s*(minutes?|mins?)\b/i;
+var MIN=/(\d+)(?:\s*(?:-|–|to)\s*\d+)?\s*(minutes?|mins?)\b/i;
 function recipe(r){
  var h='<div class="bar"><button class="btn alt" data-act="back" style="margin-left:0">‹ All recipes</button><span style="margin-left:auto"></span><button class="btn alt" data-act="big">'+(view.big?"Smaller text":"Bigger text")+'</button><button class="btn alt" data-act="edit" data-id="'+esc(r.id)+'">Edit</button></div>';
  h+='<div class="rv'+(view.big?" big":"")+'"><h1>'+esc(r.title)+'</h1><div class="meta">'+esc([r.time,r.serves?"Serves "+r.serves:""].filter(Boolean).join(" · "))+"</div>";
@@ -240,7 +241,9 @@ function recipe(r){
  h+='</ul><h2>Steps</h2><p class="note" style="margin-top:-4px">Tap a step to mark where you are.</p><ol class="steps">';
  for(var j=0;j<r.steps.length;j++){var m=r.steps[j].match(MIN);
   h+='<li data-act="step" data-i="'+j+'" class="'+(j==view.cur?"cur":j<view.cur?"past":"")+'">'+esc(r.steps[j])+(m?'<br><button class="tb" data-act="timer" data-m="'+m[1]+'" data-l="'+esc(r.title+", step "+(j+1))+'">Start '+m[1]+" min timer</button>":"")+"</li>"}
- return h+"</ol></div>";
+ h+="</ol>";
+ if(r.notes&&r.notes.length){h+="<h2>Notes</h2>";for(var k=0;k<r.notes.length;k++)h+='<p class="rn">'+esc(r.notes[k])+"</p>"}
+ return h+"</div>";
 }
 function render(){
  var r=view.name=="recipe"?find(view.id):null;
@@ -256,7 +259,7 @@ function form(r){
  openSheet('<h2>'+(r.id?"Edit recipe":"Add a recipe")+'</h2><form id="f">'+(r.id?"":'<label for="fx">Paste a whole recipe (optional)</label><textarea id="fx" placeholder="Paste copied recipe text here, then tap the button below."></textarea><div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" class="btn alt" data-act="parse" style="margin-left:0">Fill in the form for me</button></div><div class="hint" id="fxm"></div>')+'<label for="ft">Name</label><input id="ft" required value="'+esc(r.title)+'"><label for="fm">Time</label><input id="fm" placeholder="e.g. 45 min" value="'+esc(r.time)+'"><label for="fs">Serves</label><input id="fs" value="'+esc(r.serves)+'"><label for="fi">Ingredients</label><textarea id="fi">'+esc(r.ing.join("\n"))+'</textarea><div class="hint">One ingredient per line.</div><label for="fp">Steps</label><textarea id="fp">'+esc(r.steps.join("\n"))+'</textarea><div class="hint">One step per line. Steps that mention minutes get a timer button.</div><div class="row">'+(r.id?'<button type="button" class="btn alt" data-act="del" data-id="'+esc(r.id)+'" style="margin-right:auto;margin-left:0">Delete</button>':"")+'<button type="button" class="btn alt" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>');
  $("f").onsubmit=function(e){e.preventDefault();
   var lines=function(id){return $(id).value.split("\n").map(function(s){return s.trim()}).filter(Boolean)};
-  var n={id:r.id||"r"+Date.now(),title:$("ft").value.trim()||"Untitled",time:$("fm").value.trim(),serves:$("fs").value.trim(),ing:lines("fi"),steps:lines("fp")};
+  var n={id:r.id||"r"+Date.now(),title:$("ft").value.trim()||"Untitled",time:$("fm").value.trim(),serves:$("fs").value.trim(),ing:lines("fi"),steps:lines("fp")};if(r.notes)n.notes=r.notes;
   var f=false;for(var i=0;i<MINE.length;i++)if(MINE[i].id===n.id){MINE[i]=n;f=true}
   if(!f)MINE.push(n);save("kd.mine",MINE);merge();closeSheet();view={name:"recipe",id:n.id,q:"",big:view.big,checked:{},cur:0};render();
  };
@@ -353,7 +356,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21c";
+var VERSION="2026-11-21d";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){
