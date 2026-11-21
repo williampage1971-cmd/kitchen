@@ -17,7 +17,8 @@ The owner photographs recipe-book pages and asks Claude to add them.
 - `"cats":["Breakfast"]`: one or more categories, shown as filter buttons on the iPad. Use the names in
   `categories.json` (the owner's list, in button order; empty ones still show) and add a new name there only if the
   owner asks; Title Case.
-  Use the page's own "Course"/"Cuisine" lines as a guide.
+  **Never choose a category yourself: always ask the owner which category (or categories) before committing
+  the recipe**, unless they already said with the photo. You may mention what the page's "Course"/"Cuisine" says.
 - **Dish photo**: if the page shows a photo of the food, cut it out of the owner's picture and save it as
   `images/<id>.jpg`, then add `"img":"images/<id>.jpg"`. With Pillow: straighten with
   `Image.transform((W,H), Image.QUAD, (TLx,TLy, BLx,BLy, BRx,BRy, TRx,TRy))` using corners set slightly inside the
