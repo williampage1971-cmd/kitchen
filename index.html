@@ -127,7 +127,28 @@ function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}ca
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var us=(navigator.language||"en-US").indexOf("US")>-1;
 var S=load("kd.settings",{city:"",lat:null,lon:null,unit:us?"F":"C",h12:us});
-var R=load("kd.recipes",null);if(!R){R=SAMPLES.slice();save("kd.recipes",R)}
+/* Recipes come from two places:
+   SHARED = recipes.json in the GitHub repo (added by Claude from photos; backed up)
+   MINE   = recipes added or edited on this iPad (localStorage only)
+   HIDE   = shared recipes removed on this iPad */
+var MINE=load("kd.mine",null);
+if(!MINE){MINE=[];var old=load("kd.recipes",null)||[];
+ for(var oi=0;oi<old.length;oi++){var ok=true;
+  for(var si=0;si<SAMPLES.length;si++)if(SAMPLES[si].id===old[oi].id&&JSON.stringify(SAMPLES[si])===JSON.stringify(old[oi]))ok=false;
+  if(ok)MINE.push(old[oi])}
+ save("kd.mine",MINE)}
+var HIDE=load("kd.hidden",[]);
+var SHARED=load("kd.shared",null)||SAMPLES;
+var R=[];
+function isMine(id){for(var i=0;i<MINE.length;i++)if(MINE[i].id===id)return true;return false}
+function isShared(id){for(var i=0;i<SHARED.length;i++)if(SHARED[i].id===id)return true;return false}
+function merge(){var out=[],i;
+ for(i=0;i<SHARED.length;i++){var s=SHARED[i];if(s&&s.id&&!isMine(s.id)&&HIDE.indexOf(s.id)<0)out.push(s)}
+ R=out.concat(MINE)}
+merge();
+function loadShared(){get("recipes.json?v="+Date.now(),function(j){
+ if(j&&typeof j.length=="number"){SHARED=j;save("kd.shared",j);merge();if(view.name=="list"||!find(view.id))render()}
+},function(){})}
 var view={name:"list",id:null,q:"",big:false,checked:{},cur:0};
 var timers=[],tid=1,actx=null;
 var $=function(id){return document.getElementById(id)};
@@ -179,9 +200,9 @@ function list(){
  var rs=R.slice().sort(function(a,b){return a.title.toLowerCase()<b.title.toLowerCase()?-1:1});
  for(var i=0;i<rs.length;i++){var r=rs[i];
   if(q&&(r.title+" "+r.ing.join(" ")).toLowerCase().indexOf(q)<0)continue;
-  c+='<button class="card" data-act="open" data-id="'+esc(r.id)+'"><b>'+esc(r.title)+"</b><span>"+esc([r.time,r.serves?"Serves "+r.serves:""].filter(Boolean).join(" · "))+"</span></button>"}
+  c+='<button class="card" data-act="open" data-id="'+esc(r.id)+'"><b>'+esc(r.title)+"</b><span>"+esc([r.time,r.serves?"Serves "+r.serves:"",isMine(r.id)?"On this iPad only":""].filter(Boolean).join(" · "))+"</span></button>"}
  h+='<div class="cards">'+(c||'<p class="note">No recipes match.</p>')+"</div>";
- h+='<p class="note">The four starter recipes are examples. Edit or delete them, and add your own. Recipes are saved on this iPad.</p>';
+ h+='<p class="note">Recipes Claude adds from your photos appear here automatically and are backed up on GitHub. Recipes you add or edit on this iPad are saved on this iPad only.</p>';
  return h;
 }
 var MIN=/(\d+)\s*(minutes?|mins?)\b/i;
@@ -206,16 +227,16 @@ function openSheet(h){$("sheet").innerHTML=h;$("modal").hidden=false}
 function closeSheet(){$("modal").hidden=true}
 function form(r){
  r=r||{title:"",time:"",serves:"",ing:[],steps:[]};
- openSheet('<h2>'+(r.id?"Edit recipe":"Add a recipe")+'</h2><form id="f"><label for="ft">Name</label><input id="ft" required value="'+esc(r.title)+'"><label for="fm">Time</label><input id="fm" placeholder="e.g. 45 min" value="'+esc(r.time)+'"><label for="fs">Serves</label><input id="fs" value="'+esc(r.serves)+'"><label for="fi">Ingredients</label><textarea id="fi">'+esc(r.ing.join("\n"))+'</textarea><div class="hint">One ingredient per line.</div><label for="fp">Steps</label><textarea id="fp">'+esc(r.steps.join("\n"))+'</textarea><div class="hint">One step per line. Steps that mention minutes get a timer button.</div><div class="row">'+(r.id?'<button type="button" class="btn alt" data-act="del" data-id="'+esc(r.id)+'" style="margin-right:auto;margin-left:0">Delete</button>':"")+'<button type="button" class="btn alt" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>');
+ openSheet('<h2>'+(r.id?"Edit recipe":"Add a recipe")+'</h2><form id="f">'+(r.id?"":'<label for="fx">Paste a whole recipe (optional)</label><textarea id="fx" placeholder="Paste copied recipe text here, then tap the button below."></textarea><div class="row" style="justify-content:flex-start;margin-top:8px"><button type="button" class="btn alt" data-act="parse" style="margin-left:0">Fill in the form for me</button></div><div class="hint" id="fxm"></div>')+'<label for="ft">Name</label><input id="ft" required value="'+esc(r.title)+'"><label for="fm">Time</label><input id="fm" placeholder="e.g. 45 min" value="'+esc(r.time)+'"><label for="fs">Serves</label><input id="fs" value="'+esc(r.serves)+'"><label for="fi">Ingredients</label><textarea id="fi">'+esc(r.ing.join("\n"))+'</textarea><div class="hint">One ingredient per line.</div><label for="fp">Steps</label><textarea id="fp">'+esc(r.steps.join("\n"))+'</textarea><div class="hint">One step per line. Steps that mention minutes get a timer button.</div><div class="row">'+(r.id?'<button type="button" class="btn alt" data-act="del" data-id="'+esc(r.id)+'" style="margin-right:auto;margin-left:0">Delete</button>':"")+'<button type="button" class="btn alt" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>');
  $("f").onsubmit=function(e){e.preventDefault();
   var lines=function(id){return $(id).value.split("\n").map(function(s){return s.trim()}).filter(Boolean)};
   var n={id:r.id||"r"+Date.now(),title:$("ft").value.trim()||"Untitled",time:$("fm").value.trim(),serves:$("fs").value.trim(),ing:lines("fi"),steps:lines("fp")};
-  if(r.id){for(var i=0;i<R.length;i++)if(R[i].id===r.id)R[i]=n}else R.push(n);
-  save("kd.recipes",R);closeSheet();view={name:"recipe",id:n.id,q:"",big:view.big,checked:{},cur:0};render();
+  var f=false;for(var i=0;i<MINE.length;i++)if(MINE[i].id===n.id){MINE[i]=n;f=true}
+  if(!f)MINE.push(n);save("kd.mine",MINE);merge();closeSheet();view={name:"recipe",id:n.id,q:"",big:view.big,checked:{},cur:0};render();
  };
 }
 function settings(){
- openSheet('<h2>Settings</h2><form id="g"><label for="gc">Your town or city (for weather)</label><input id="gc" value="'+esc(S.city)+'" placeholder="e.g. Portland"><div class="hint" id="gmsg"></div><label>Temperature</label><div class="seg"><button type="button" data-u="F" class="'+(S.unit=="F"?"on":"")+'">°F</button><button type="button" data-u="C" class="'+(S.unit=="C"?"on":"")+'">°C</button></div><label>Clock</label><div class="seg"><button type="button" data-c="12" class="'+(S.h12?"on":"")+'">12-hour</button><button type="button" data-c="24" class="'+(S.h12?"":"on")+'">24-hour</button></div><div class="row"><button type="button" class="btn alt" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>');
+ openSheet('<h2>Settings</h2><form id="g"><label for="gc">Your town or city (for weather)</label><input id="gc" value="'+esc(S.city)+'" placeholder="e.g. Portland"><div class="hint" id="gmsg"></div><label>Temperature</label><div class="seg"><button type="button" data-u="F" class="'+(S.unit=="F"?"on":"")+'">°F</button><button type="button" data-u="C" class="'+(S.unit=="C"?"on":"")+'">°C</button></div><label>Clock</label><div class="seg"><button type="button" data-c="12" class="'+(S.h12?"on":"")+'">12-hour</button><button type="button" data-c="24" class="'+(S.h12?"":"on")+'">24-hour</button></div><label>Recipes</label><button type="button" class="btn alt" data-act="'+(HIDE.length?"unhide":"refresh")+'" style="margin-left:0">'+(HIDE.length?"Bring back "+HIDE.length+" removed recipe"+(HIDE.length>1?"s":""):"Check for new recipes now")+'</button><div class="row"><button type="button" class="btn alt" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>');
  var unit=S.unit,h12=S.h12,bs=$("sheet").getElementsByTagName("button");
  for(var i=0;i<bs.length;i++)(function(b){if(b.getAttribute("data-u")||b.getAttribute("data-c"))b.onclick=function(){var sib=b.parentNode.children;for(var k=0;k<sib.length;k++)sib[k].className="";b.className="on";if(b.getAttribute("data-u"))unit=b.getAttribute("data-u");else h12=b.getAttribute("data-c")=="12"}})(bs[i]);
  $("g").onsubmit=function(e){e.preventDefault();var c=$("gc").value.trim();
@@ -233,6 +254,51 @@ function custom(){
  $("c").onsubmit=function(e){e.preventDefault();var m=parseFloat($("cm").value);if(m>0){addTimer(m,$("cl").value.trim()||null);closeSheet()}};
 }
 
+/* "Paste a whole recipe": split copied text into title, ingredients and steps */
+function parseRecipe(txt){
+ var L=txt.replace(/\r/g,"").split("\n").map(function(s){return s.replace(/\s+/g," ").trim()}).filter(Boolean);
+ var o={title:"",time:"",serves:"",ing:[],steps:[]},rest=[],times={},i,m;
+ var IH=/^(ingredients?|you('|’)?ll need|you will need|what you('|’)?ll need|shopping list)\s*:?$/i,
+     SH=/^(method|directions?|instructions?|preparation|steps?|to make( it)?|how to make( it)?)\s*:?$/i,
+     SV=/^(serves|servings?|makes|yields?)\s*:?\s*(.+)$/i,
+     TM=/^(total time|time|ready in|takes|prep(aration)? time|cook(ing)? time)\s*:?\s*(.+)$/i,
+     Q=/^([\d½¼¾⅓⅔⅛]|(pinch|dash|handful)\b)/i,
+     BUL=/^[•\-\*·▪◦●]\s*/,NUM=/^(step\s*)?\d{1,2}\s*[.):]\s*/i;
+ for(i=0;i<L.length;i++){var l=L[i];
+  if(l.length<40&&(m=l.match(SV))){if(!o.serves)o.serves=m[2];continue}
+  if(l.length<50&&(m=l.match(TM))){times[m[1].toLowerCase()]=m[m.length-1];continue}
+  rest.push(l)}
+ o.time=times["total time"]||times["ready in"]||times["time"]||times["takes"]||"";
+ if(!o.time){var pt=null,ct=null;for(var k in times){if(/^prep/.test(k))pt=times[k];if(/^cook/.test(k))ct=times[k]}
+  o.time=[pt?"Prep "+pt:"",ct?"Cook "+ct:""].filter(Boolean).join(" · ")}
+ if(rest.length&&!IH.test(rest[0])&&!SH.test(rest[0]))o.title=rest.shift();
+ var ii=-1,sj=-1,ingL=[],stepL=[];
+ for(i=0;i<rest.length;i++){if(ii<0&&IH.test(rest[i]))ii=i;else if(sj<0&&SH.test(rest[i]))sj=i}
+ function heur(ls,skipIntro){var a=0,j;
+  if(skipIntro){a=-1;for(j=0;j<ls.length;j++)if(Q.test(ls[j])&&!NUM.test(ls[j])){a=j;break}if(a<0)return[[],ls]}
+  for(j=a;j<ls.length;j++)if(ls[j].length>60||NUM.test(ls[j]))break;
+  return[ls.slice(a,j),ls.slice(j)]}
+ if(ii>=0&&sj>=0){ingL=rest.slice(ii+1,sj>ii?sj:rest.length);stepL=rest.slice(sj+1,ii>sj?ii:rest.length)}
+ else if(sj>=0){ingL=heur(rest.slice(0,sj),true)[0];stepL=rest.slice(sj+1)}
+ else if(ii>=0){var h1=heur(rest.slice(ii+1),false);ingL=h1[0];stepL=h1[1]}
+ else{var h2=heur(rest,true);ingL=h2[0];stepL=h2[1]}
+ for(i=0;i<ingL.length;i++){var g=ingL[i].replace(BUL,"");if(g)o.ing.push(g)}
+ var numbered=false;for(i=0;i<stepL.length;i++)if(NUM.test(stepL[i])||BUL.test(stepL[i]))numbered=true;
+ for(i=0;i<stepL.length;i++){var s=stepL[i].replace(BUL,""),isNew=NUM.test(s)||BUL.test(stepL[i]);s=s.replace(NUM,"");if(!s)continue;
+  var n=o.steps.length,prev=n?o.steps[n-1]:"";
+  if(isNew||!n||(!numbered&&/[.!?)]$/.test(prev)))o.steps.push(s);
+  else if(/-$/.test(prev)&&/^[a-z]/.test(s))o.steps[n-1]=prev.slice(0,-1)+s;
+  else o.steps[n-1]=prev+" "+s}
+ return o;
+}
+function fillFromPaste(){var t=$("fx").value,msg=$("fxm");
+ if(!t.trim()){msg.textContent="Paste some recipe text into the box first.";return}
+ var o=parseRecipe(t);
+ if(o.title)$("ft").value=o.title;if(o.time)$("fm").value=o.time;if(o.serves)$("fs").value=o.serves;
+ $("fi").value=o.ing.join("\n");$("fp").value=o.steps.join("\n");
+ msg.textContent="Found "+o.ing.length+" ingredient"+(o.ing.length==1?"":"s")+" and "+o.steps.length+" step"+(o.steps.length==1?"":"s")+". Check the boxes below, fix anything that looks off, then tap Save.";
+}
+
 /* one tap handler for everything */
 document.addEventListener("click",function(e){
  var el=e.target;while(el&&el!==document&&!el.getAttribute("data-act"))el=el.parentNode;
@@ -244,6 +310,9 @@ document.addEventListener("click",function(e){
  else if(a=="stop"){timers=timers.filter(function(t){return t.id!=id});drawTimers()}
  else if(a=="settings")settings();
  else if(a=="close")closeSheet();
+ else if(a=="parse")fillFromPaste();
+ else if(a=="unhide"){HIDE=[];save("kd.hidden",HIDE);merge();render();loadShared();closeSheet()}
+ else if(a=="refresh"){loadShared();closeSheet()}
  else if(a=="new")form();
  else if(a=="edit")form(find(id));
  else if(a=="open"){view={name:"recipe",id:id,q:view.q,big:view.big,checked:{},cur:0};render();$("main").scrollTop=0;window.scrollTo(0,0)}
@@ -251,10 +320,11 @@ document.addEventListener("click",function(e){
  else if(a=="big"){view.big=!view.big;render()}
  else if(a=="chk"){var i=el.getAttribute("data-i");view.checked[i]=!view.checked[i];render()}
  else if(a=="step"){view.cur=+el.getAttribute("data-i");render()}
- else if(a=="del"){if(el.getAttribute("data-sure")){R=R.filter(function(r){return r.id!=id});save("kd.recipes",R);closeSheet();view.name="list";render()}else{el.setAttribute("data-sure","1");el.textContent="Tap again to delete"}}
+ else if(a=="del"){if(el.getAttribute("data-sure")){MINE=MINE.filter(function(r){return r.id!=id});save("kd.mine",MINE);
+  if(isShared(id)&&HIDE.indexOf(id)<0){HIDE.push(id);save("kd.hidden",HIDE)}merge();closeSheet();view.name="list";render()}else{el.setAttribute("data-sure","1");el.textContent="Tap again to delete"}}
 },false);
 
-render();tick();setInterval(tick,500);weather();setInterval(weather,30*60000);
+render();tick();setInterval(tick,500);weather();loadShared();setInterval(function(){weather();loadShared()},30*60000);
 })();
 </script>
 </body>
