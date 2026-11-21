@@ -292,11 +292,25 @@ function form(r){
  };
 }
 function settings(){
- openSheet('<h2>Settings</h2><form id="g"><label for="gc">Your town or city (for weather)</label><input id="gc" value="'+esc(S.city)+'" placeholder="e.g. Portland"><div class="hint" id="gmsg"></div><label>Temperature</label><div class="seg"><button type="button" data-u="F" class="'+(S.unit=="F"?"on":"")+'">°F</button><button type="button" data-u="C" class="'+(S.unit=="C"?"on":"")+'">°C</button></div><label>Clock</label><div class="seg"><button type="button" data-c="12" class="'+(S.h12?"on":"")+'">12-hour</button><button type="button" data-c="24" class="'+(S.h12?"":"on")+'">24-hour</button></div><label>Recipes</label><button type="button" class="btn alt" data-act="'+(HIDE.length?"unhide":"refresh")+'" style="margin-left:0">'+(HIDE.length?"Bring back "+HIDE.length+" removed recipe"+(HIDE.length>1?"s":""):"Check for new recipes now")+'</button><div class="row"><button type="button" class="btn alt" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>');
+ openSheet('<h2>Settings</h2><form id="g"><label for="gc">Your town or city (for weather)</label><input id="gc" value="'+esc(S.city)+'" placeholder="e.g. Portland">'+(navigator.geolocation?'<button type="button" class="btn alt" id="gloc" style="margin:10px 0 0">Use my current location</button>':"")+'<div class="hint" id="gmsg"></div><label>Temperature</label><div class="seg"><button type="button" data-u="F" class="'+(S.unit=="F"?"on":"")+'">°F</button><button type="button" data-u="C" class="'+(S.unit=="C"?"on":"")+'">°C</button></div><label>Clock</label><div class="seg"><button type="button" data-c="12" class="'+(S.h12?"on":"")+'">12-hour</button><button type="button" data-c="24" class="'+(S.h12?"":"on")+'">24-hour</button></div><label>Recipes</label><button type="button" class="btn alt" data-act="'+(HIDE.length?"unhide":"refresh")+'" style="margin-left:0">'+(HIDE.length?"Bring back "+HIDE.length+" removed recipe"+(HIDE.length>1?"s":""):"Check for new recipes now")+'</button><div class="row"><button type="button" class="btn alt" data-act="close">Cancel</button><button class="btn" type="submit">Save</button></div></form>');
  var unit=S.unit,h12=S.h12,bs=$("sheet").getElementsByTagName("button");
  for(var i=0;i<bs.length;i++)(function(b){if(b.getAttribute("data-u")||b.getAttribute("data-c"))b.onclick=function(){var sib=b.parentNode.children;for(var k=0;k<sib.length;k++)sib[k].className="";b.className="on";if(b.getAttribute("data-u"))unit=b.getAttribute("data-u");else h12=b.getAttribute("data-c")=="12"}})(bs[i]);
+ var pend=null;
+ if($("gloc"))$("gloc").onclick=function(){
+  var msg=$("gmsg");msg.textContent="Finding your location… If the iPad asks, tap Allow.";
+  navigator.geolocation.getCurrentPosition(function(pos){
+   var la=Math.round(pos.coords.latitude*1000)/1000,lo=Math.round(pos.coords.longitude*1000)/1000;
+   function use(name){pend={city:name,lat:la,lon:lo};$("gc").value=name;msg.textContent="Found you: "+name+". Tap Save.";}
+   get("https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en&latitude="+la+"&longitude="+lo,function(j){
+    var n=j.city||j.locality||"";use(n?n+(j.principalSubdivision?", "+j.principalSubdivision:""):"Current location")},
+    function(){use("Current location")});
+  },function(err){
+   msg.textContent=err&&err.code==1?"The iPad didn't allow location. To turn it on: Settings → Privacy → Location Services → Safari Websites → While Using the App. Or type your town above.":"Couldn't find your location. Check the Wi-Fi, or type your town above.";
+  },{enableHighAccuracy:false,timeout:15000,maximumAge:3600000});
+ };
  $("g").onsubmit=function(e){e.preventDefault();var c=$("gc").value.trim();
   function done(){S.unit=unit;S.h12=h12;save("kd.settings",S);closeSheet();tick();weather()}
+  if(pend&&c==pend.city){S.city=pend.city;S.lat=pend.lat;S.lon=pend.lon;done();return}
   if(!c||c==S.city){done();return}
   $("gmsg").textContent="Looking up "+c+"…";
   get("https://geocoding-api.open-meteo.com/v1/search?count=1&name="+encodeURIComponent(c),function(j){
@@ -385,7 +399,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21h";
+var VERSION="2026-11-21i";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){
