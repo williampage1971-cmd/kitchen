@@ -171,15 +171,20 @@ function merge(){var out=[],i;
  for(i=0;i<SHARED.length;i++){var s=SHARED[i];if(s&&s.id&&!isMine(s.id)&&HIDE.indexOf(s.id)<0)out.push(s)}
  R=out.concat(MINE)}
 merge();
-function loadShared(){get("recipes.json?v="+Date.now(),function(j){
+function loadCats(){get("categories.json?v="+Date.now(),function(j){if(j&&typeof j.length=="number"){CATLIST=j;save("kd.catlist",j);if(view.name=="list")render()}},function(){})}
+function loadShared(){loadCats();get("recipes.json?v="+Date.now(),function(j){
  if(j&&typeof j.length=="number"){SHARED=j;save("kd.shared",j);merge();if(view.name=="list"||!find(view.id))render()}
 },function(){})}
 var view={name:"list",id:null,q:"",big:false,checked:{},cur:0};
 var curCat=load("kd.cat","");
 function hasCatAny(c){for(var i=0;i<R.length;i++)if(hasCat(R[i],c))return true;return false}
 function catsOf(r){return r&&r.cats&&r.cats.length?r.cats:[]}
-function allCats(){var seen={},out=[];for(var i=0;i<R.length;i++){var c=catsOf(R[i]);for(var j=0;j<c.length;j++)if(!seen[c[j].toLowerCase()]){seen[c[j].toLowerCase()]=1;out.push(c[j])}}
- return out.sort(function(a,b){return a.toLowerCase()<b.toLowerCase()?-1:1})}
+/* category list: categories.json in the repo (in display order), plus any extra used by recipes */
+var CATLIST=load("kd.catlist",null)||["Breakfast"];
+function allCats(){var seen={},out=[],extra=[],i,j;
+ for(i=0;i<CATLIST.length;i++)if(!seen[CATLIST[i].toLowerCase()]){seen[CATLIST[i].toLowerCase()]=1;out.push(CATLIST[i])}
+ for(i=0;i<R.length;i++){var c=catsOf(R[i]);for(j=0;j<c.length;j++)if(!seen[c[j].toLowerCase()]){seen[c[j].toLowerCase()]=1;extra.push(c[j])}}
+ return out.concat(extra.sort(function(a,b){return a.toLowerCase()<b.toLowerCase()?-1:1}))}
 function hasCat(r,c){var x=catsOf(r);for(var i=0;i<x.length;i++)if(x[i].toLowerCase()==c.toLowerCase())return true;return false}
 var timers=[],tid=1,actx=null;
 var $=function(id){return document.getElementById(id)};
@@ -242,7 +247,7 @@ function drawTimers(){
 /* recipe screens */
 function list(){
  var q=view.q.toLowerCase(),h='<div class="bar"><h1>Recipes</h1><button class="btn" data-act="new">+ Add recipe</button></div><input class="search" id="q" type="search" placeholder="Search recipes or ingredients" value="'+esc(view.q)+'">',c="",ac=allCats(),n=0;
- if(curCat&&!hasCatAny(curCat))curCat="";
+ if(curCat){var okc=false,acl=allCats();for(var ai=0;ai<acl.length;ai++)if(acl[ai].toLowerCase()==curCat.toLowerCase())okc=true;if(!okc)curCat=""}
  if(ac.length){h+='<div class="cats" role="group" aria-label="Categories"><button data-act="cat" data-c="" class="'+(curCat?"":"on")+'">All</button>';
   for(var ci=0;ci<ac.length;ci++)h+='<button data-act="cat" data-c="'+esc(ac[ci])+'" class="'+(curCat.toLowerCase()==ac[ci].toLowerCase()?"on":"")+'">'+esc(ac[ci])+"</button>";
   h+="</div>"}
@@ -399,7 +404,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21i";
+var VERSION="2026-11-21j";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){

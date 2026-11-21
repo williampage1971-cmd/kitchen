@@ -13,8 +13,9 @@ The owner photographs recipe-book pages and asks Claude to add them.
   (e.g. "For the sauce") must be their own `ing` entry ending in a colon; the app shows those as headings, not tick boxes.
 - Say "N minutes" in a step where the book gives a time: the app turns it into a timer button
   (a range like "15-18 minutes" makes a timer for the first number).
-- `"cats":["Breakfast"]`: one or more categories, shown as filter buttons on the iPad. Reuse existing
-  ones (check recipes.json) before inventing new ones; Title Case. Current set: Breakfast.
+- `"cats":["Breakfast"]`: one or more categories, shown as filter buttons on the iPad. Use the names in
+  `categories.json` (the owner's list, in button order; empty ones still show) and add a new name there only if the
+  owner asks; Title Case.
   Use the page's own "Course"/"Cuisine" lines as a guide.
 - **Dish photo**: if the page shows a photo of the food, cut it out of the owner's picture and save it as
   `images/<id>.jpg`, then add `"img":"images/<id>.jpg"`. With Pillow: straighten with
