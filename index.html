@@ -100,8 +100,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .ing li.on button{color:var(--soft);text-decoration:line-through}
 .ing li.on button:before{background:var(--red);border-color:var(--red)}
 .steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li.sh{cursor:default;font-family:Outfit,sans-serif;font-weight:600;font-size:19px;color:var(--mus);padding:16px 0 2px;margin:0}
+.steps li.sh:before{display:none}
+.big .steps li.sh{font-size:25px}
 .steps li{counter-increment:s;padding:14px 16px 14px 62px;position:relative;border-radius:14px;margin-bottom:8px;cursor:pointer}
-.steps li:before{content:counter(s);position:absolute;left:14px;top:12px;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--line);text-align:center;line-height:34px;font-weight:700}
+.steps li:before{content:attr(data-n);position:absolute;left:14px;top:12px;width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--line);text-align:center;line-height:34px;font-weight:700}
 .steps li.cur{background:var(--card);outline:3px solid var(--mus)}
 .steps li.cur:before{background:var(--mus);border-color:var(--mus);color:#1d1b1a}
 .steps li.past{color:var(--soft)}
@@ -286,6 +289,7 @@ function timerBtns(text,label){var re=new RegExp(MIN.source,"gi"),m,seen={},out=
   if(/(more|less|longer|no more|no longer) than\s*$|\bover\s*$/i.test(before)||seen[m[1]])continue;
   seen[m[1]]=1;out+='<button class="tb" data-act="timer" data-m="'+m[1]+'" data-l="'+esc(label)+'">Start '+m[1]+" min timer</button>"}
  return out}
+function firstStep(r){if(r&&r.steps)for(var i=0;i<r.steps.length;i++)if(!/:\s*$/.test(r.steps[i]))return i;return 0}
 function recipe(r){
  var h='<div class="bar"><button class="btn alt" data-act="back" style="margin-left:0">‹ All recipes</button><span style="margin-left:auto"></span><button class="btn alt" data-act="big">'+(view.big?"Smaller text":"Bigger text")+'</button><button class="btn alt" data-act="edit" data-id="'+esc(r.id)+'">Edit</button></div>';
  h+='<div class="rv'+(view.big?" big":"")+'"><h1>'+esc(r.title)+'</h1>'+(r.img?'<div class="hero" role="img" aria-label="Photo of '+esc(r.title)+'" style="background-image:url(\''+esc(r.img)+'\')"></div>':"")+'<div class="meta">'+esc([r.time,r.serves?"Serves "+r.serves:"",catsOf(r).join(", ")].filter(Boolean).join(" · "))+"</div>";
@@ -294,8 +298,11 @@ function recipe(r){
   if(/:\s*$/.test(r.ing[i]))h+='<li class="sub">'+esc(r.ing[i].replace(/:\s*$/,""))+"</li>";
   else h+='<li class="'+(view.checked[i]?"on":"")+'"><button data-act="chk" data-i="'+i+'">'+esc(r.ing[i])+"</button></li>"}
  h+='</ul><h2>Steps</h2><p class="note" style="margin-top:-4px">Tap a step to mark where you are.</p><ol class="steps">';
- for(var j=0;j<r.steps.length;j++){var tb=timerBtns(r.steps[j],r.title+", step "+(j+1));
-  h+='<li data-act="step" data-i="'+j+'" class="'+(j==view.cur?"cur":j<view.cur?"past":"")+'">'+esc(r.steps[j])+(tb?"<br>"+tb:"")+"</li>"}
+ var sn=0,sec="";
+ for(var j=0;j<r.steps.length;j++){
+  if(/:\s*$/.test(r.steps[j])){sec=r.steps[j].replace(/:\s*$/,"");sn=0;h+='<li class="sh">'+esc(sec)+"</li>";continue}
+  sn++;var tb=timerBtns(r.steps[j],r.title+(sec?", "+sec:"")+", step "+sn);
+  h+='<li data-act="step" data-n="'+sn+'" data-i="'+j+'" class="'+(j==view.cur?"cur":j<view.cur?"past":"")+'">'+esc(r.steps[j])+(tb?"<br>"+tb:"")+"</li>"}
  h+="</ol>";
  if(r.notes&&r.notes.length){h+="<h2>Notes</h2>";for(var k=0;k<r.notes.length;k++)h+='<p class="rn">'+esc(r.notes[k])+"</p>"}
  return h+"</div>";
@@ -418,7 +425,7 @@ document.addEventListener("click",function(e){
  else if(a=="refresh"){loadShared();closeSheet()}
  else if(a=="new")form();
  else if(a=="edit")form(find(id));
- else if(a=="open"){view={name:"recipe",id:id,q:view.q,big:view.big,checked:{},cur:0};render();$("main").scrollTop=0;window.scrollTo(0,0)}
+ else if(a=="open"){view={name:"recipe",id:id,q:view.q,big:view.big,checked:{},cur:firstStep(find(id))};render();$("main").scrollTop=0;window.scrollTo(0,0)}
  else if(a=="back"){view.name="list";render()}
  else if(a=="big"){view.big=!view.big;render()}
  else if(a=="chk"){var i=el.getAttribute("data-i");view.checked[i]=!view.checked[i];render()}
@@ -430,7 +437,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21n";
+var VERSION="2026-11-21o";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){

@@ -11,6 +11,8 @@ The owner photographs recipe-book pages and asks Claude to add them.
 - Transcribe faithfully: keep the book's quantities, units, temperatures and wording. One ingredient per
   `ing` entry; one step per `steps` entry, joining lines the page wrapped. Ingredient sub-headings
   (e.g. "For the sauce") must be their own `ing` entry ending in a colon; the app shows those as headings, not tick boxes.
+  The same works in `steps`: a step ending in a colon (e.g. "To Make the Salad:") is a section heading and the
+  step numbers restart at 1 after it, matching books that number each section separately.
 - Say "N minutes" in a step where the book gives a time: the app turns it into a timer button
   (a range like "15-18 minutes" makes a timer for the first number; every time in a step gets its own
   button, except warnings such as "more than 20 minutes"; "3 more minutes" works).
