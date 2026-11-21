@@ -29,10 +29,20 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .clock{font-family:Outfit,Helvetica,sans-serif;font-weight:300;font-size:96px;line-height:1;letter-spacing:-2px;white-space:nowrap}
 .clock small{font-size:28px;letter-spacing:0;margin-left:6px;font-weight:600}
 .date{font-size:22px;margin-top:8px;font-weight:700;color:var(--mus)}
-.wx{display:block;width:100%;text-align:left;margin-top:22px;padding:14px 16px;border-radius:14px;background:var(--chip);color:var(--on);min-height:44px}
+.side>*{-webkit-flex-shrink:0;flex-shrink:0}
+.wx{display:block;width:100%;text-align:left;margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--chip);color:var(--on);min-height:44px}
 .wx b{color:#fff;font-family:Outfit,sans-serif;font-weight:600;font-size:40px;line-height:1}
 .wx span{display:block;font-size:16px;opacity:.9}
-.side h2{font-family:Outfit,sans-serif;font-weight:600;font-size:22px;margin:26px 0 10px}
+.wx .now{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}
+.wx .now svg{width:44px;height:44px;margin-right:10px;-webkit-flex:none;flex:none}
+.fc{display:-webkit-flex;display:flex;margin:14px -4px 0;padding-top:12px;border-top:1px solid #3a3531}
+.fc div{-webkit-flex:1;flex:1;text-align:center;padding:0 2px}
+.fc i{display:block;font-style:normal;font-size:14px;font-weight:700;color:var(--soft)}
+.fc svg{width:30px;height:30px;margin:4px 0 2px}
+.fc b{display:block;font-family:Outfit,sans-serif;font-size:18px;font-weight:600;line-height:1.1;white-space:nowrap}
+.fc em{display:block;font-style:normal;font-size:14px;color:var(--soft);white-space:nowrap}
+.fc u{display:block;text-decoration:none;font-size:13px;color:#7fb2e5;white-space:nowrap}
+.side h2{font-family:Outfit,sans-serif;font-weight:600;font-size:22px;margin:20px 0 8px}
 .presets{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-4px}
 .presets button{margin:4px;min-width:56px;min-height:48px;padding:0 12px;border-radius:12px;background:var(--chip);color:var(--on);border:1px solid #3a3531;font-weight:700;font-size:18px}
 .t{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--chip);border-left:4px solid var(--red2)}
@@ -44,7 +54,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 @-webkit-keyframes pulse{50%{opacity:.6}}@keyframes pulse{50%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){.t.done{-webkit-animation:none;animation:none}}
 .empty{opacity:.8;font-size:15px;margin-top:10px}
-.foot{margin-top:auto;padding-top:24px}
+.foot{margin-top:auto;padding-top:12px}
 .foot button{color:var(--soft);text-decoration:underline;min-height:44px;font-size:15px;padding:0}
 .main{-webkit-flex:1;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:28px 30px 60px}
 .bar{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin-bottom:18px}
@@ -168,13 +178,27 @@ function tick(){
 /* weather (Open-Meteo, no key needed) */
 var WX={0:"Clear",1:"Mostly clear",2:"Partly cloudy",3:"Cloudy",45:"Fog",48:"Fog",51:"Light drizzle",53:"Drizzle",55:"Drizzle",56:"Freezing drizzle",57:"Freezing drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",66:"Freezing rain",67:"Freezing rain",71:"Light snow",73:"Snow",75:"Heavy snow",77:"Snow",80:"Showers",81:"Showers",82:"Heavy showers",85:"Snow showers",86:"Snow showers",95:"Thunderstorms",96:"Thunderstorms",99:"Thunderstorms"};
 function get(url,ok,bad){try{var x=new XMLHttpRequest();x.open("GET",url,true);x.timeout=15000;x.onload=function(){if(x.status==200){try{ok(JSON.parse(x.responseText))}catch(e){bad()}}else bad()};x.onerror=bad;x.ontimeout=bad;x.send()}catch(e){bad()}}
+/* small weather pictures, drawn as SVG so they work offline and on old iPads */
+var CL='<path d="M7 19h10.5a4 4 0 0 0 .4-7.98A6 6 0 0 0 6.3 11.1 4 4 0 0 0 7 19z" fill="#c9c2bb"/>';
+function icon(c){var sun='<circle cx="12" cy="12" r="4.5" fill="#f2b632"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke="#f2b632" stroke-width="1.8" stroke-linecap="round"/>',b;
+ if(c<=1)b=sun;
+ else if(c==2)b='<g transform="translate(4 -3) scale(.75)">'+sun+'</g>'+CL;
+ else if(c==3||c==45||c==48)b=CL;
+ else if(c>=95)b='<g transform="translate(0 -3)">'+CL+'</g><path d="M12.5 15l-2.5 4h3l-2 4" stroke="#f2b632" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+ else if((c>=71&&c<=77)||c==85||c==86)b='<g transform="translate(0 -3)">'+CL+'</g><circle cx="8.5" cy="20" r="1.2" fill="#fff"/><circle cx="12.5" cy="22" r="1.2" fill="#fff"/><circle cx="16.5" cy="20" r="1.2" fill="#fff"/>';
+ else b='<g transform="translate(0 -3)">'+CL+'</g><path d="M9 18.5l-1 2.5M13 18.5l-1 2.5M17 18.5l-1 2.5" stroke="#7fb2e5" stroke-width="1.8" stroke-linecap="round"/>';
+ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+b+"</svg>"}
 function weather(){
  var w=$("wx");
  if(S.lat==null){w.innerHTML="<span>Tap to set your town for the weather</span>";return}
- var u="https://api.open-meteo.com/v1/forecast?latitude="+S.lat+"&longitude="+S.lon+"&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1"+(S.unit=="F"?"&temperature_unit=fahrenheit":"");
+ var u="https://api.open-meteo.com/v1/forecast?latitude="+S.lat+"&longitude="+S.lon+"&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=6"+(S.unit=="F"?"&temperature_unit=fahrenheit":"");
  get(u,function(j){
   var c=j.current,dl=j.daily;
-  w.innerHTML="<b>"+Math.round(c.temperature_2m)+"°"+S.unit+"</b> <span>"+esc(WX[c.weather_code]||"")+" in "+esc(S.city)+"</span><span>High "+Math.round(dl.temperature_2m_max[0])+"° · Low "+Math.round(dl.temperature_2m_min[0])+"°</span>";
+  var h='<div class="now">'+icon(c.weather_code)+"<b>"+Math.round(c.temperature_2m)+"°"+S.unit+"</b></div><span>"+esc(WX[c.weather_code]||"")+" in "+esc(S.city)+"</span><span>Today: high "+Math.round(dl.temperature_2m_max[0])+"° · low "+Math.round(dl.temperature_2m_min[0])+"°</span>";
+  h+='<div class="fc">';
+  for(var i=1;i<dl.time.length&&i<=5;i++){var t=dl.time[i].split("-"),day=DAYS[new Date(+t[0],t[1]-1,+t[2]).getDay()].slice(0,3),pp=dl.precipitation_probability_max?dl.precipitation_probability_max[i]:null;
+   h+="<div><i>"+day+"</i>"+icon(dl.weather_code[i])+"<b>"+Math.round(dl.temperature_2m_max[i])+"°</b><em>"+Math.round(dl.temperature_2m_min[i])+"°</em>"+(pp>=20?"<u>"+pp+"% rain</u>":"")+"</div>"}
+  w.innerHTML=h+"</div>";
  },function(){w.innerHTML="<span>Weather is unavailable right now"+(S.city?" for "+esc(S.city):"")+"</span>"});
 }
 
