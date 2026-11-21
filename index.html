@@ -348,7 +348,24 @@ document.addEventListener("click",function(e){
   if(isShared(id)&&HIDE.indexOf(id)<0){HIDE.push(id);save("kd.hidden",HIDE)}merge();closeSheet();view.name="list";render()}else{el.setAttribute("data-sure","1");el.textContent="Tap again to delete"}}
 },false);
 
-render();tick();setInterval(tick,500);weather();loadShared();setInterval(function(){weather();loadShared()},30*60000);
+/* self-update: version.txt in the repo holds the current version; when it differs from
+   VERSION below, reload with a fresh address (skipping the iPad's saved copy).
+   Waits while a timer is running, a recipe is open or a window is showing. */
+var VERSION="2026-11-21b";
+var pendingUpdate=null;
+function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
+function applyUpdate(){
+ if(!pendingUpdate||busy())return;
+ try{if(sessionStorage.getItem("kd.tried")==pendingUpdate)return;sessionStorage.setItem("kd.tried",pendingUpdate)}catch(e){}
+ location.replace(location.pathname+"?v="+encodeURIComponent(pendingUpdate));
+}
+function checkUpdate(){try{var x=new XMLHttpRequest();x.open("GET","version.txt?t="+Date.now(),true);
+ x.onload=function(){var v=(x.responseText||"").replace(/\s+/g,"");if(x.status==200&&v&&v!=VERSION&&v.length<40){pendingUpdate=v;applyUpdate()}};
+ x.send()}catch(e){}}
+render();tick();setInterval(tick,500);weather();loadShared();checkUpdate();
+setInterval(function(){weather();loadShared();checkUpdate()},30*60000);
+setInterval(applyUpdate,60000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden){checkUpdate();loadShared()}},false);
 })();
 </script>
 </body>

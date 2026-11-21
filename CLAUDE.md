@@ -20,3 +20,9 @@ The owner photographs recipe-book pages and asks Claude to add them.
 `index.html` must run on old iPad Safari: ES5 only (var, function, XMLHttpRequest; no arrow functions,
 let/const, template literals, fetch, CSS grid or clamp). Recipes added on the iPad live in localStorage
 (`kd.mine`); removed shared recipes in `kd.hidden`.
+
+## Releasing a change to index.html
+The iPad auto-updates: it compares `version.txt` with `var VERSION` in `index.html` (on open, on wake and
+every 30 min) and reloads when they differ, but not while a timer runs, a recipe is open or a dialog shows.
+**Whenever you change `index.html`, set the same new value (e.g. `2026-12-01a`) in both `var VERSION` and
+`version.txt`**, or the iPad will keep its old copy. Recipe-only changes to `recipes.json` need no bump.
