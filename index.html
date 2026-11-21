@@ -256,7 +256,7 @@ function list(){
   if(curCat&&!hasCat(r,curCat))continue;
   if(q&&(r.title+" "+r.ing.join(" ")+" "+catsOf(r).join(" ")).toLowerCase().indexOf(q)<0)continue;
   c+='<button class="card'+(r.img?" pic":"")+'" data-act="open" data-id="'+esc(r.id)+'">'+(r.img?'<i class="thumb" style="background-image:url(\''+esc(r.img)+'\')"></i>':"")+'<b>'+esc(r.title)+"</b><span>"+esc([r.time,r.serves?"Serves "+r.serves:"",isMine(r.id)?"On this iPad only":""].filter(Boolean).join(" · "))+"</span></button>"}
- h+='<div class="cards">'+(c||'<p class="note">No recipes match'+(curCat?" in "+esc(curCat):"")+".</p>")+"</div>";
+ h+='<div class="cards">'+(c||'<p class="note">'+(curCat&&!q&&!hasCatAny(curCat)?"No "+esc(curCat)+" recipes yet. Send Claude photos of some, or tap + Add recipe.":"No recipes match"+(curCat?" in "+esc(curCat):"")+".")+"</p>")+"</div>";
  h+='<p class="note">Recipes Claude adds from your photos appear here automatically and are backed up on GitHub. Recipes you add or edit on this iPad are saved on this iPad only.</p>';
  return h;
 }
@@ -404,7 +404,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21j";
+var VERSION="2026-11-21k";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){
