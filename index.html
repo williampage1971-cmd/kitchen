@@ -68,6 +68,15 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .cats button.on{background:var(--red);border-color:var(--red);color:#fff}
 .cats.sm{margin:6px -4px 0}.cats.sm button{min-height:40px;font-size:15px;padding:0 12px}
 .search{width:100%;font-size:17px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);margin-bottom:18px;-webkit-appearance:none}
+.lh{-webkit-flex-wrap:nowrap;flex-wrap:nowrap;margin-bottom:12px}
+.lh h1{margin:0;-webkit-flex:none;flex:none}
+.lh .search{-webkit-flex:1;flex:1;width:auto;margin:0 0 0 8px}
+.lh .btn{margin:0 0 0 12px;-webkit-flex:none;flex:none}
+.fade{position:relative;margin:0 -30px 16px 0}
+.fade:after{content:"";position:absolute;top:0;right:0;bottom:0;width:44px;pointer-events:none;background:-webkit-linear-gradient(left,rgba(18,17,16,0),#121110);background:linear-gradient(to right,rgba(18,17,16,0),#121110)}
+.cats.crow{-webkit-flex-wrap:nowrap;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0;padding:0 44px 0 0}
+.cats.crow::-webkit-scrollbar{display:none}
+.cats.crow button{-webkit-flex:none;flex:none;margin:0 8px 0 0;white-space:nowrap}
 .cards{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-8px}
 .card{width:calc(50% - 16px);margin:8px;text-align:left;padding:20px;border-radius:16px;background:var(--card);border:1px solid var(--line);min-height:120px}
 .card:active{border-color:var(--red2)}
@@ -117,8 +126,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
  .main{padding:22px 18px 60px;overflow:visible}
  .card{width:calc(100% - 16px)}
  .bar h1,.rv h1{font-size:34px}
+ .lh{-webkit-flex-wrap:wrap;flex-wrap:wrap}
+ .lh .search{-webkit-order:3;order:3;-webkit-flex:1 1 100%;flex:1 1 100%;margin:12px 0 0}
+ .lh .btn{margin-left:auto}
+ .fade{margin-right:-18px}
 }
 @media (min-width:1100px){.clock{font-size:120px}.card{width:calc(33.33% - 16px)}}
+@media (max-width:900px){
+ .lh{-webkit-flex-wrap:wrap;flex-wrap:wrap}
+ .lh .search{-webkit-order:3;order:3;-webkit-flex:1 1 100%;flex:1 1 100%;margin:12px 0 0}
+ .lh .btn{margin-left:auto}
+ .card{width:calc(100% - 16px)}
+}
 </style>
 </head>
 <body>
@@ -246,11 +265,11 @@ function drawTimers(){
 
 /* recipe screens */
 function list(){
- var q=view.q.toLowerCase(),h='<div class="bar"><h1>Recipes</h1><button class="btn" data-act="new">+ Add recipe</button></div><input class="search" id="q" type="search" placeholder="Search recipes or ingredients" value="'+esc(view.q)+'">',c="",ac=allCats(),n=0;
+ var q=view.q.toLowerCase(),h='<div class="bar lh"><h1>Recipes</h1><input class="search" id="q" type="search" placeholder="Search recipes or ingredients" aria-label="Search recipes" value="'+esc(view.q)+'"><button class="btn" data-act="new">+ Add recipe</button></div>',c="",ac=allCats(),n=0;
  if(curCat){var okc=false,acl=allCats();for(var ai=0;ai<acl.length;ai++)if(acl[ai].toLowerCase()==curCat.toLowerCase())okc=true;if(!okc)curCat=""}
- if(ac.length){h+='<div class="cats" role="group" aria-label="Categories"><button data-act="cat" data-c="" class="'+(curCat?"":"on")+'">All</button>';
+ if(ac.length){h+='<div class="fade"><div class="cats crow" id="catrow" role="group" aria-label="Categories"><button data-act="cat" data-c="" class="'+(curCat?"":"on")+'">All</button>';
   for(var ci=0;ci<ac.length;ci++)h+='<button data-act="cat" data-c="'+esc(ac[ci])+'" class="'+(curCat.toLowerCase()==ac[ci].toLowerCase()?"on":"")+'">'+esc(ac[ci])+"</button>";
-  h+="</div>"}
+  h+="</div></div>"}
  var rs=R.slice().sort(function(a,b){return a.title.toLowerCase()<b.title.toLowerCase()?-1:1});
  for(var i=0;i<rs.length;i++){var r=rs[i];
   if(curCat&&!hasCat(r,curCat))continue;
@@ -278,6 +297,7 @@ function recipe(r){
 function render(){
  var r=view.name=="recipe"?find(view.id):null;
  $("main").innerHTML=r?recipe(r):list();
+ var cr=$("catrow");if(cr){var on=cr.getElementsByClassName("on")[0];if(on&&on.offsetLeft+on.offsetWidth>cr.clientWidth)cr.scrollLeft=on.offsetLeft-40}
  var q=$("q");if(q)q.oninput=function(){view.q=q.value;var p=q.selectionStart;render();var n=$("q");n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
 }
 
@@ -404,7 +424,7 @@ document.addEventListener("click",function(e){
 /* self-update: version.txt in the repo holds the current version; when it differs from
    VERSION below, reload with a fresh address (skipping the iPad's saved copy).
    Waits while a timer is running, a recipe is open or a window is showing. */
-var VERSION="2026-11-21l";
+var VERSION="2026-11-21m";
 var pendingUpdate=null;
 function busy(){return timers.length>0||view.name=="recipe"||!$("modal").hidden}
 function applyUpdate(){
