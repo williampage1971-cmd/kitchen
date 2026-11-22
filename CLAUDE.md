@@ -42,19 +42,28 @@ every 30 min) and reloads when they differ, but not while a timer runs, a recipe
 **Whenever you change `index.html`, set the same new value (e.g. `2026-12-01a`) in both `var VERSION` and
 `version.txt`**, or the iPad will keep its old copy. Recipe-only changes to `recipes.json` need no bump.
 
-## Status (as of 2026-11-22)
-- 44 recipes entered, roughly the first half of the owner's binder. No recipe is waiting on a missing page.
+## Status (as of 2026-11-22, end of second session)
+- 75 recipes entered (the binder's main dishes, sides and desserts sections are done up to Pumpkin Bread).
+  No recipe is waiting on a missing page. The owner said "that's enough recipes" for now.
 - Category buttons (categories.json): Breakfast, Italian, Bowls/Mexican, Soups/Chilis, Casseroles/One-Pot, Meats,
-  Chicken, Seafood, Sides, Desserts, Non-WW, Holiday. Still empty: Meats, Chicken, Seafood, Sides, Desserts, Non-WW, Holiday.
+  Chicken, Seafood, Sides, Desserts, Non-WW, Holiday. Only Holiday is still empty.
 - Owner's preferences learned so far:
-  - Always ask for the category (one at a time is fine); they usually pick a single category.
-  - Leave out website logos/watermarks/badges from dish photos; skip a photo that's an unrecognisable smudge.
+  - Always ask for the category (one at a time is fine); they usually pick a single category. Their picks so far:
+    beef/pork/turkey mains → Meats; chicken mains → Chicken (not Italian any more); dips, spice mixes, breads, beans → Sides;
+    WW-style sweets incl. French toast casseroles → Desserts; full-sugar/butter recipes (cookies, cinnamon rolls) → Non-WW.
+  - Leave out website logos/watermarks/badges/product shots (e.g. a syrup bottle, Amazon air-fryer ads) from dish photos;
+    skip a photo that's an unrecognisable smudge. Odd-coloured but recognisable photos: they chose to keep them.
   - Multi-page printouts: add page 1 with a "Not finished yet" note, then complete it when page 2 arrives.
-    If the owner can't find page 2, remove the note and keep what's there.
-  - Drop printout junk ("[social_warfare]", "click here", "See process pictures"); fix obvious typos and say so.
+    If the owner can't find page 2, remove the note and keep what's there. Many printouts say "Page 1 of 3" (or 2)
+    with a blank last page: if the recipe already looks complete, add it without the note.
+  - A page with two recipes on it: split them into two entries.
+  - Drop printout junk ("[social_warfare]", "click here", "See process pictures", ratings, "Leave a review", store ads);
+    fix obvious typos and say so.
 - Open questions the owner hasn't answered yet:
   - Keep or remove blurry photos on One-Pot Cajun Chicken and Sausage Pasta, Bubble Up Pizza Casserole,
     Bubble Up Chicken Pot Pie Casserole?
-  - Creamy Bacon Ranch Chicken Pasta step 3: the pressure-release sentence makes stray 5 and 30 min timer buttons.
+  - Stray timer buttons left as printed: Creamy Bacon Ranch Chicken Pasta step 3 (5 and 30 min, pressure release);
+    Spinach & Artichoke Chicken step 4 ("after the 15 minutes"); Easy French Toast Casserole step 5 ("After 20 minutes").
   - Possible misprints left as printed: "29 kalamata olives" (Greek Chicken Bowls); "(from about 2)" on the
-    marinara line (Chicken Parmesan Lasagna).
+    marinara line (Chicken Parmesan Lasagna); 9.6g protein (Spicy Garlic Salmon); 0g net carbs (Pumpkin Spice French
+    Toast Casserole); "1 1/4 liquid eggs" (Easy French Toast Casserole).
