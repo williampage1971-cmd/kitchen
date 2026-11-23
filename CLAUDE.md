@@ -43,10 +43,12 @@ every 30 min) and reloads when they differ, but not while a timer runs, a recipe
 `version.txt`**, or the iPad will keep its old copy. Recipe-only changes to `recipes.json` need no bump.
 
 ## Status (as of 2026-11-22, end of second session)
-- 75 recipes entered (the binder's main dishes, sides and desserts sections are done up to Pumpkin Bread).
-  No recipe is waiting on a missing page. The owner said "that's enough recipes" for now.
+- 76 recipes entered (the binder's main dishes, sides and desserts sections are done up to Pumpkin Bread, plus
+  Christmas Bread (Vánočka) from a hardback book). No recipe is waiting on a missing page.
+  Books that number steps straight through across sub-sections: put the sub-section name at the start of its first
+  step ("Working on the Top Layer — ...") instead of a colon heading, so the numbers match the book.
 - Category buttons (categories.json): Breakfast, Italian, Bowls/Mexican, Soups/Chilis, Casseroles/One-Pot, Meats,
-  Chicken, Seafood, Sides, Desserts, Non-WW, Holiday. Only Holiday is still empty.
+  Chicken, Seafood, Sides, Desserts, Non-WW, Holiday. Every category now has at least one recipe.
 - Owner's preferences learned so far:
   - Always ask for the category (one at a time is fine); they usually pick a single category. Their picks so far:
     beef/pork/turkey mains → Meats; chicken mains → Chicken (not Italian any more); dips, spice mixes, breads, beans → Sides;
