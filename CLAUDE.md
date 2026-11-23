@@ -26,6 +26,10 @@ The owner photographs recipe-book pages and asks Claude to add them.
   `Image.transform((W,H), Image.QUAD, (TLx,TLy, BLx,BLy, BRx,BRy, TRx,TRy))` using corners set slightly inside the
   printed photo (no page edges or text), about 800px wide, `ImageOps.autocontrast(cutoff=1)`, JPEG quality ~78
   (keep files around 100 KB for the old iPad). Look at the result before committing. No photo on the page → no `img`.
+- **Step-by-step photos** (e.g. braiding pictures): cut each one out (upright, ~560px wide, ~50 KB) as
+  `images/<id>-<word>-1.jpg`, `-2.jpg`... and list them in reading order in `"photos":[...]`. The app shows them as a
+  numbered grid after the steps; tapping one opens it large with Back/Next. Pages of these may come in several photos:
+  append to the same list.
 - Optional `"notes":["..."]` holds extras such as nutrition/WW points, brand tips and the source/author;
   they show under the steps.
 - If a word is unreadable, make the best guess and tell the owner which one to check.
